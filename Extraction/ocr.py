@@ -8,6 +8,47 @@ from wand.image import Image
 from PIL import Image as PI
 import io
 
+import pyocr
+import pyocr.builders
+
+def extract_pdf_pyocr(filepath):
+    final_texts = []
+    req_image = []
+
+    print "Converting pdf to jpeg"
+    image_pdf = Image(filename=filepath, resolution=300)
+    image_jpeg = image_pdf.convert('jpeg')
+
+    for img in tqdm(image_jpeg.sequence, "Separating pages"):
+        img_page = Image(image=img)
+        req_image.append(img_page.make_blob('jpeg'))
+
+    tools = pyocr.get_available_tools()
+    if len(tools) == 0:
+        print("No OCR tool found")
+        sys.exit(1)
+    # The tools are returned in the recommended order of usage
+    tool = tools[0]
+    print("Will use tool '%s'" % (tool.get_name()))
+    # Ex: Will use tool 'libtesseract'
+
+    langs = tool.get_available_languages()
+    print("Available languages: %s" % ", ".join(langs))
+    lang = langs[0]
+    print("Will use lang '%s'" % (lang))
+    # Ex: Will use lang 'fra'
+    # Note that languages are NOT sorted in any way. Please refer
+    # to the system locale settings for the default language
+    # to use.
+
+    for img in tqdm(req_image, "Recognizing text"):
+        txt = tool.image_to_string(
+            Image.open('test.png'),
+            lang=lang,
+            builder=pyocr.builders.TextBuilder()
+        )
+        final_texts.append(txt)
+
 
 def extract_pdf(filepath):
     final_texts = []
