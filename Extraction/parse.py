@@ -15,6 +15,7 @@ with open(filename) as text:
             processing_object = True
         elif re.match("\d.*\w{2}. *\d",line): #start of a new entry
             divided_list = re.split("[;.] ",line) #break line
+            print divided_list
             site = ""
             ID = ""
             sjm = ""
