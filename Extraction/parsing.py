@@ -59,15 +59,19 @@ def get_stratum(text):
     return str(roman.fromRoman(string))
 
 def get_plate(text):
-    strings = re.findall(r'\(P[l1]\..+\)', text)
+    strings = re.findall(r'\(P[l1]\..*?\)', text)
     if len(strings) == 0:
         print 'Plate not found: ' + text
         return None
-    string = strings[0]
-    string = re.sub(r'Pl. |P1. |no. |[()]', '', string)
-    string = string.replace(', ', '-')
-    if string[-1] == '.': string = string[:-1]
-    return string.strip()
+    plates = ""
+    for i in range(len(strings)):
+        s = strings[i]
+        s = re.sub(r'Pl. |P1. |no. |[()]', '', s)
+        s = s.replace(', ', '-')
+        if s[-1] == '.': s = s[:-1]
+        plates += s.strip() + ", "
+    plates = plates[:-2] #remove last ", "
+    return plates
 
 ### ------------------------------------------ ###
 
@@ -119,4 +123,6 @@ def parse_chapter(texts):
     return result
 
 if __name__ == '__main__':
-    print parse_page(open('/Users/simonposada/src/DH_Fall2016/Extraction/result/page_4.txt', 'r').read())
+    x = parse_page(open('result/page_4.txt', 'r').read())
+    print x
+    x.to_csv("output.csv")
