@@ -40,6 +40,25 @@ def get_block(text):
     block_string = string.replace('Block ', '').replace('Trench ', 'T-')
     return block_string
 
+def get_raw_square(text):
+    #couldn't find regex of proper sensitivity. best I got was
+    #re.findall(r'sq. \d+.?\d+.?', text)
+    print text
+    strings = []
+    split_text = text.split("; ")
+    for item in split_text:
+        if "sq. " in item:
+            strings.append(item)
+    print strings
+    if len(strings) == 0:
+        return None
+    all_squares = ""
+    for i in range(len(strings)):
+        s = strings[i]    
+        s = s.replace('sq. ', '')
+        all_squares += s + ", "
+    return all_squares[:-2]
+
 def get_square(text):
     strings = re.findall(r'sq. \d+-\d+', text)
     if len(strings) == 0:
@@ -85,8 +104,8 @@ def parse_entry(text):
     entry['block'] = get_block(text)
     entry['stratum'] = get_stratum(text)
     entry['plate'] = get_plate(text)
-    # entry['description'] = text
-
+    entry['description'] = text
+    entry['square'] = get_raw_square(text)
     square  = get_square(text)
     if square:
         entry['x'] = square[0]
