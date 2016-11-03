@@ -61,7 +61,7 @@ def get_raw_square(text):
         all_squares += s + ", "
     return all_squares[:-2]
 
-def get_squarev2(text):
+def get_square(text):
     raw_squarelist = square_list(text)
     if len(raw_squarelist) == 0:
         return None
@@ -72,18 +72,22 @@ def get_squarev2(text):
         square = re.findall(r'\d+.\d+',raw_square)
         if len(square) >= 1:
             for squarestring in square:
-                coord = re.split("['-.]",squarestring)
+                coord = re.split("\D",squarestring)
                 xystring += "(%s,%s),"%(coord[0],coord[1])
     return xystring[:-1]
 
-def get_square(text):
-    strings = re.findall(r'sq. \d+-\d+', text)
-    if len(strings) == 0:
-        print 'Square not found: ' + text
+def get_first_XY(text): #return the first X,Y
+    raw_squarelist = square_list(text)
+    if len(raw_squarelist) == 0:
         return None
-    string = strings[0]
-    square_string = string.replace('sq. ', '')
-    return square_string.split('-')
+    xystring = ""
+    for raw_square in raw_squarelist:
+        raw_square = raw_square.replace(" ", "")
+        square = re.findall(r'\d+.\d+',raw_square)
+        if len(square) >= 1:
+            for squarestring in square:
+                coord = re.split("\D",squarestring)
+                return coord
 
 def get_stratum(text):
     strings = re.findall(r'stratum \w{1,3}', text)
@@ -122,17 +126,14 @@ def parse_entry(text):
     entry['stratum'] = get_stratum(text)
     entry['plate'] = get_plate(text)
     entry['description'] = text
-    entry['squares'] = get_raw_square(text)
-    entry['X,Y'] = get_squarev2(text)
-    """
-    square  = get_square(text)
+    entry['(X,Y)'] = get_square(text)
+    square = get_first_XY(text)
     if square:
-        entry['x'] = square[0]
-        entry['y'] = square[1]
+        entry['X'] = square[0]
+        entry['Y'] = square[1]
     else:
-        entry['x'] = None
-        entry['y'] = None
-    """
+        entry['X'] = None
+        entry['Y'] = None    
     return entry
 
 def parse_page(text):
