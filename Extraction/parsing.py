@@ -40,16 +40,18 @@ def get_block(text):
     block_string = string.replace('Block ', '').replace('Trench ', 'T-')
     return block_string
 
-def get_raw_square(text):
-    #couldn't find regex of proper sensitivity. best I got was
-    #re.findall(r'sq. \d+.?\d+.?', text)
-    print text
+def square_list(text):
     strings = []
     split_text = text.split("; ")
     for item in split_text:
         if "sq. " in item:
             strings.append(item)
-    print strings
+    return strings    
+
+def get_raw_square(text):
+    #couldn't find regex of proper sensitivity. best I got was
+    #re.findall(r'sq. \d+.?\d+.?', text)
+    strings = square_list(text)
     if len(strings) == 0:
         return None
     all_squares = ""
@@ -58,6 +60,21 @@ def get_raw_square(text):
         s = s.replace('sq. ', '')
         all_squares += s + ", "
     return all_squares[:-2]
+
+def get_squarev2(text):
+    raw_squarelist = square_list(text)
+    if len(raw_squarelist) == 0:
+        return None
+    squarelist = []
+    xystring = ""
+    for raw_square in raw_squarelist:
+        raw_square = raw_square.replace(" ", "")
+        square = re.findall(r'\d+.\d+',raw_square)
+        if len(square) >= 1:
+            for squarestring in square:
+                coord = re.split("['-.]",squarestring)
+                xystring += "(%s,%s),"%(coord[0],coord[1])
+    return xystring[:-1]
 
 def get_square(text):
     strings = re.findall(r'sq. \d+-\d+', text)
@@ -105,7 +122,9 @@ def parse_entry(text):
     entry['stratum'] = get_stratum(text)
     entry['plate'] = get_plate(text)
     entry['description'] = text
-    entry['square'] = get_raw_square(text)
+    entry['squares'] = get_raw_square(text)
+    entry['X,Y'] = get_squarev2(text)
+    """
     square  = get_square(text)
     if square:
         entry['x'] = square[0]
@@ -113,7 +132,7 @@ def parse_entry(text):
     else:
         entry['x'] = None
         entry['y'] = None
-
+    """
     return entry
 
 def parse_page(text):
