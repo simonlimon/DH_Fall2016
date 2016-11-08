@@ -6,11 +6,12 @@ import roman
 ### ------- helpers for data retrieval ------- ###
 
 def get_num(text):
-    num_strings = re.findall(r'\A\d+\s*\.', text)
+    num_strings = re.findall(r'\A\d+\s?\d+', text)
     if len(num_strings) == 0:
         print 'Number not found: ' + text
         return None
     num_string = num_strings[0]
+    num_string = num_string.replace(' ', '')
     num = int(re.sub(r'\D', "", num_string))
     return num
 
@@ -143,7 +144,7 @@ def parse_page(text):
     for line in lines:
         if len(line) == 0: continue
         # Check for titles and blobs that are not entries.
-        if re.match(r'\d+\s?\.\s+(..)\..*', line):
+        if re.match(r'\A\d+\s?\d+\..+', line):
             entries.append(line)
         elif len(entries) > 0:
             entries[-1] = entries[-1] + ' ' + line
@@ -164,4 +165,4 @@ def parse_chapter(texts):
 if __name__ == '__main__':
     x = parse_page(open('result/page_4.txt', 'r').read())
     print x
-    x.to_csv("output.csv")
+    # x.to_csv("output.csv")
