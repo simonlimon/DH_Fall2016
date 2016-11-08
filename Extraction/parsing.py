@@ -1,7 +1,11 @@
 # coding=utf-8
+import os
+
 import pandas as pd
 import re
 import roman
+import glob
+
 
 ### ------- helpers for data retrieval ------- ###
 
@@ -116,7 +120,7 @@ def get_plate(text):
 
 ### ------------------------------------------ ###
 
-def parse_entry(text):
+def parse_entry(text, _class):
 
     entry = pd.Series()
 
@@ -127,7 +131,8 @@ def parse_entry(text):
     entry['stratum'] = get_stratum(text)
     entry['plate'] = get_plate(text)
     entry['description'] = text
-    entry['(X,Y)'] = get_square(text)
+    # entry['(X,Y)'] = get_square(text)
+    entry['class'] = _class
     square = get_first_XY(text)
     if square:
         entry['X'] = square[0]
@@ -137,32 +142,39 @@ def parse_entry(text):
         entry['Y'] = None    
     return entry
 
-def parse_page(text):
+def parse(text):
     lines = text.split('\n')
     entries = []
+    classes = []
+    current_class = ''
 
     for line in lines:
         if len(line) == 0: continue
         # Check for titles and blobs that are not entries.
         if re.match(r'\A\d+\s?\d+\..+', line):
             entries.append(line)
+            classes.append(current_class)
+        elif re.match(r'\Aclass|\ACLASS', line):
+            line = line.replace('CLASS', '').replace('class', '')
+            current_class = line
         elif len(entries) > 0:
             entries[-1] = entries[-1] + ' ' + line
 
     result = pd.DataFrame()
-    for entry in entries:
-        parsed = parse_entry(entry)
+    for entry, _class in zip(entries, classes):
+        parsed = parse_entry(entry, _class)
         result = result.append(parsed)
     return result
 
-def parse_chapter(texts):
-    result = pd.DataFrame()
-    for text in texts:
-        page = parse_page(text)
-        result.append(page)
-    return result
+def parse_directory(path):
+    text = ''
+    for filename in glob.glob(os.path.join(path, '*.txt')):
+        # print filename
+        text += '\n' + (open(filename).read())
+    return parse(text)
 
 if __name__ == '__main__':
-    x = parse_page(open('result/page_4.txt', 'r').read())
+    x = parse_directory('/Users/simonposada/src/DH_Fall2016/Extraction/result')
+    # x = parse(open('result/page_4.txt', 'r').read())
     print x
     # x.to_csv("output.csv")
