@@ -74,12 +74,18 @@ def get_square(text):
     xystring = ""
     for raw_square in raw_squarelist:
         raw_square = raw_square.replace(" ", "")
-        square = re.findall(r'\d+.\d+',raw_square)
+        square = re.findall(r'\d+.\d+',raw_square) #looks like ["##-##","##.##"] etc.
         if len(square) >= 1:
             for squarestring in square:
-                coord = re.split("\D",squarestring)
-                xystring += "(%s,%s),"%(coord[0],coord[1])
-    return xystring[:-1]
+                try:
+                    coord = re.split("\D",squarestring)
+                    xystring += "(%s,%s),"%(coord[0],coord[1])
+                except: #sometimes not coordinates, like "Size 2375 in. sq. by 2 in"
+                    continue
+    try:
+        return xystring[:-1]
+    except:
+        return None
 
 def get_first_XY(text): #return the first X,Y
     raw_squarelist = square_list(text)
@@ -131,7 +137,7 @@ def parse_entry(text, _class):
     entry['stratum'] = get_stratum(text)
     entry['plate'] = get_plate(text)
     entry['description'] = text
-    # entry['(X,Y)'] = get_square(text)
+    entry['(X,Y)'] = get_square(text)
     entry['class'] = _class
     square = get_first_XY(text)
     if square:
@@ -174,7 +180,7 @@ def parse_directory(path):
     return parse(text)
 
 if __name__ == '__main__':
-    x = parse_directory('/Users/simonposada/src/DH_Fall2016/Extraction/result')
+    x = parse_directory('result')
     # x = parse(open('result/page_4.txt', 'r').read())
     print x
-    # x.to_csv("output.csv")
+    x.to_csv("output.csv")
