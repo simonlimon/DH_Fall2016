@@ -92,12 +92,12 @@ def get_square(text):
         return None
 
 def get_square_simon(text):
-    strings = re.findall(r'sq.\s*\d+.\d+', text)
+    strings = re.findall(r'sq.[\siI]*\d+.\d+', text)
     if len(strings) == 0:
         # print 'Square not found: ' + text
         return None
     string = strings[0]
-    square_string = string.replace('sq. ', '').replace(' ',  '')
+    square_string = string.replace('sq. ', '').replace('I', '1').replace('i', '1').replace(' ',  '')
     strings = re.findall(r'\d+', square_string)
     if len(strings) == 2:
         return strings
@@ -115,7 +115,10 @@ def get_first_XY(text): #return the first X,Y
         if len(square) >= 1:
             for squarestring in square:
                 coord = re.split("\D",squarestring)
-                return coord
+                if len(coord) == 2:
+                    return coord
+                else:
+                    return None
 
 def get_stratum(text):
     strings = re.findall(r'stratum \w{1,3}', text)
@@ -161,7 +164,7 @@ def parse_entry(text, _class):
     entry['description'] = text
     # entry['(X,Y)'] = get_square(text)
     entry['class'] = _class
-    square = get_first_XY(text)
+    square = get_square_simon(text)
     if square:
         entry['X'] = square[0]
         entry['Y'] = square[1]
