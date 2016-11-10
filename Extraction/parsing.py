@@ -78,12 +78,18 @@ def get_square(text):
     xystring = ""
     for raw_square in raw_squarelist:
         raw_square = raw_square.replace(" ", "")
-        square = re.findall(r'\d+.\d+',raw_square)
+        square = re.findall(r'\d+.\d+',raw_square) #looks like ["##-##","##.##"] etc.
         if len(square) >= 1:
             for squarestring in square:
-                coord = re.split("\D",squarestring)
-                xystring += "(%s,%s),"%(coord[0],coord[1])
-    return xystring[:-1]
+                try:
+                    coord = re.split("\D",squarestring)
+                    xystring += "(%s,%s),"%(coord[0],coord[1])
+                except: #sometimes not coordinates, like "Size 2375 in. sq. by 2 in"
+                    continue
+    try:
+        return xystring[:-1]
+    except:
+        return None
 
 def get_square_simon(text):
     strings = re.findall(r'sq.\s*\d+.\d+', text)
@@ -155,7 +161,7 @@ def parse_entry(text, _class):
     entry['description'] = text
     # entry['(X,Y)'] = get_square(text)
     entry['class'] = _class
-    square = get_square_simon(text)
+    square = get_first_XY(text)
     if square:
         entry['X'] = square[0]
         entry['Y'] = square[1]
