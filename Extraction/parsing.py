@@ -1,3 +1,4 @@
+#!/usr/local/bin/python
 # coding=utf-8
 import os
 
@@ -8,11 +9,14 @@ import glob
 
 
 ### ------- helpers for data retrieval ------- ###
+import sys
+from tqdm import tqdm
+
 
 def get_num(text):
     num_strings = re.findall(r'\A\d+\s?\d+', text)
     if len(num_strings) == 0:
-        print 'Number not found: ' + text
+        # print 'Number not found: ' + text
         return None
     num_string = num_strings[0]
     num_string = num_string.replace(' ', '')
@@ -22,7 +26,7 @@ def get_num(text):
 def get_site(text):
     strings = re.findall(r'Sk.|Dh.|Bm.|Jl.|Mm.|Jn.|Kn.|Gr.|Bl.', text)
     if len(strings) == 0:
-        print 'Place not found: ' + text
+        # print 'Place not found: ' + text
         return None
     site_string = strings[0]
     return site_string[:-1]
@@ -30,7 +34,7 @@ def get_site(text):
 def get_year(text):
     strings = re.findall(r'’\d\d', text)
     if len(strings) == 0:
-        print 'Year not found: ' + text
+        # print 'Year not found: ' + text
         return None
     string = strings[0]
     year_string = '19' + string[3:]
@@ -39,7 +43,7 @@ def get_year(text):
 def get_block(text):
     strings = re.findall(r'Block .|Trench [A-Z]\d+, .|T\d', text)
     if len(strings) == 0:
-        print 'Block not found: ' + text
+        # print 'Block not found: ' + text
         return None
     string = strings[0]
     block_string = string.replace('Block ', '').replace('Trench ', 'T-')
@@ -81,6 +85,19 @@ def get_square(text):
                 xystring += "(%s,%s),"%(coord[0],coord[1])
     return xystring[:-1]
 
+def get_square_simon(text):
+    strings = re.findall(r'sq.\s*\d+.\d+', text)
+    if len(strings) == 0:
+        # print 'Square not found: ' + text
+        return None
+    string = strings[0]
+    square_string = string.replace('sq. ', '').replace(' ',  '')
+    strings = re.findall(r'\d+', square_string)
+    if len(strings) == 2:
+        return strings
+    else:
+        return None
+
 def get_first_XY(text): #return the first X,Y
     raw_squarelist = square_list(text)
     if len(raw_squarelist) == 0:
@@ -97,16 +114,21 @@ def get_first_XY(text): #return the first X,Y
 def get_stratum(text):
     strings = re.findall(r'stratum \w{1,3}', text)
     if len(strings) == 0:
-        print 'Stratum not found: ' + text
+        # print 'Stratum not found: ' + text
         return None
     string = strings[0]
     string = string.replace('1', 'I').replace('stratum ', '')
-    return str(roman.fromRoman(string))
+    try:
+        num = str(roman.fromRoman(string))
+        return num
+    except Exception:
+        # print 'Stratum not found: ' + text
+        return None
 
 def get_plate(text):
     strings = re.findall(r'\(P[l1]\..*?\)', text)
     if len(strings) == 0:
-        print 'Plate not found: ' + text
+        # print 'Plate not found: ' + text
         return None
     plates = ""
     for i in range(len(strings)):
@@ -133,7 +155,7 @@ def parse_entry(text, _class):
     entry['description'] = text
     # entry['(X,Y)'] = get_square(text)
     entry['class'] = _class
-    square = get_first_XY(text)
+    square = get_square_simon(text)
     if square:
         entry['X'] = square[0]
         entry['Y'] = square[1]
@@ -161,7 +183,7 @@ def parse(text):
             entries[-1] = entries[-1] + ' ' + line
 
     result = pd.DataFrame()
-    for entry, _class in zip(entries, classes):
+    for entry, _class in tqdm(zip(entries, classes), 'Generating csv'):
         parsed = parse_entry(entry, _class)
         result = result.append(parsed)
     return result
@@ -173,8 +195,14 @@ def parse_directory(path):
         text += '\n' + (open(filename).read())
     return parse(text)
 
+def main(directory):
+    df = parse_directory(directory)
+    df.to_csv(directory + '/result.csv')
+
 if __name__ == '__main__':
-    x = parse_directory('/Users/simonposada/src/DH_Fall2016/Extraction/result')
-    # x = parse(open('result/page_4.txt', 'r').read())
-    print x
-    # x.to_csv("output.csv")
+    error_message = "Usage: ./parsing.py <directory>"
+    if len(sys.argv) < 2:
+        sys.stderr.write(error_message)
+    else:
+        main(sys.argv[1])
+    main(sys.argv[1])
