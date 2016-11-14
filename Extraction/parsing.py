@@ -70,7 +70,7 @@ def get_raw_square(text):
         all_squares += s + ", "
     return all_squares[:-2]
 
-def get_square(text):
+def get_square_old(text):
     raw_squarelist = square_list(text)
     if len(raw_squarelist) == 0:
         return None
@@ -91,13 +91,15 @@ def get_square(text):
     except:
         return None
 
-def get_square_simon(text):
+def get_square(text):
+    text = re.sub("[Ii]",'1',text)
+    text = text.replace(" ","")
     strings = re.findall(r'sq.[\siI]*\d+.\d+', text)
     if len(strings) == 0:
         # print 'Square not found: ' + text
         return None
     string = strings[0]
-    square_string = string.replace('sq. ', '').replace('I', '1').replace('i', '1').replace(' ',  '')
+    square_string = string.replace('sq. ', '')
     strings = re.findall(r'\d+', square_string)
     if len(strings) == 2:
         return strings
@@ -164,7 +166,7 @@ def parse_entry(text, _class):
     entry['description'] = text
     # entry['(X,Y)'] = get_square(text)
     entry['class'] = _class
-    square = get_square_simon(text)
+    square = get_square(text)
     if square:
         entry['X'] = square[0]
         entry['Y'] = square[1]
