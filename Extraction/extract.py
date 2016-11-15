@@ -6,8 +6,8 @@ import ocr
 import parsing
 
 def main(pdf_path, result_dir):
-    ocr.main(pdf_path, result_dir)
-    df = parsing.parse_directory(result_dir)
+    ocr.main(pdf_path, result_dir + '/raw')
+    df = parsing.parse_directory(result_dir + '/raw')
     df.to_csv(result_dir + '/result.csv')
 
 if __name__ == '__main__':
