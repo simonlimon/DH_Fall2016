@@ -184,7 +184,7 @@ def parse(text):
     for line in lines:
         if len(line) == 0: continue
         # Check for titles and blobs that are not entries.
-        if re.match(r'\A\d+\s?\d+\..+', line):
+        if re.match(r'\A\s*\d+\s*\d+[.,].+', line):
             entries.append(line)
             classes.append(current_class)
         elif re.match(r'\Aclass|\ACLASS', line):
