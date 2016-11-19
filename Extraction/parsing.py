@@ -170,9 +170,11 @@ def parse_entry(text, _class):
     if square:
         entry['X'] = square[0]
         entry['Y'] = square[1]
+        entry['coord'] = "%s,%s" % (square[0], square[1])
     else:
         entry['X'] = None
-        entry['Y'] = None    
+        entry['Y'] = None
+        entry['coord'] = None
     return entry
 
 def parse(text):
