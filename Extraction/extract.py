@@ -11,7 +11,7 @@ def main(pdf_path, result_dir):
     df.to_csv(result_dir + '/result.csv')
 
 if __name__ == '__main__':
-    error_message = "Usage: ./extract.py <file_to_read.pdf> <destination_directory>"
+    error_message = "Usage: ./extract.py [<file_to_read.pdf> | <directory>] <destination_directory>"
     if len(sys.argv) < 3:
         sys.stderr.write(error_message)
     elif not sys.argv[1].endswith('.pdf'):

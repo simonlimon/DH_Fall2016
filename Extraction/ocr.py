@@ -8,15 +8,13 @@ from wand.image import Image
 from PIL import Image as PI
 import io
 
-import pyocr
-import pyocr.builders
-
 def read_pdf(filepath):
     final_texts = []
     req_image = []
 
     print "Converting pdf to jpeg"
-    image_pdf = Image(filename=filepath, resolution=300)
+    image_pdf = Image(filename=filepath,
+                      resolution=300)
     image_jpeg = image_pdf.convert('jpeg')
     
     for img in tqdm(image_jpeg.sequence, "Separating pages"):
@@ -37,7 +35,7 @@ def main(pdf_path, result_directory):
 
     page_num = 1
     for text in texts:
-        file = open(result_directory + '/page_' + str(page_num) + '.txt', 'w+')
+        file = open(result_directory + '/page_' + str(page_num).zfill(2) + '.txt', 'w+')
         file.write('\n' + text)
         file.close()
         page_num += 1
@@ -46,7 +44,9 @@ if __name__ == '__main__':
     error_message = "Usage: ./ocr.py <file_to_read.pdf> <destination_directory>"
     if len(sys.argv) < 3:
         sys.stderr.write(error_message)
+        exit(1)
     elif not sys.argv[1].endswith('.pdf'):
         sys.stderr.write(error_message)
+        exit(1)
     else:
         main(sys.argv[1], sys.argv[2])

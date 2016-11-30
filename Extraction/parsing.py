@@ -14,12 +14,12 @@ from tqdm import tqdm
 
 
 def get_num(text):
-    num_strings = re.findall(r'\A\d+\s?\d+', text)
+    num_strings = re.findall(r'\A\s*[\sIil\d]+', text)
     if len(num_strings) == 0:
         # print 'Number not found: ' + text
         return None
     num_string = num_strings[0]
-    num_string = num_string.replace(' ', '')
+    num_string = num_string.replace(' ', '').replace('I', '1').replace('l', '1').replace('i', '1')
     num = int(re.sub(r'\D', "", num_string))
     return num
 
@@ -183,10 +183,14 @@ def parse(text):
     classes = []
     current_class = ''
 
+    after_newline = False
     for line in lines:
-        if len(line) == 0: continue
+        if len(line) == 0:
+            after_newline = True
+            continue
+
         # Check for titles and blobs that are not entries.
-        if re.match(r'\A\s*\d+\s*\d+[.,].+', line):
+        if re.match(r'\A\s*[\sIil\d]+[.,].+', line) and after_newline:
             entries.append(line)
             classes.append(current_class)
         elif re.match(r'\Aclass|\ACLASS', line):
@@ -194,6 +198,8 @@ def parse(text):
             current_class = line
         elif len(entries) > 0:
             entries[-1] = entries[-1] + ' ' + line
+
+        after_newline = False
 
     result = pd.DataFrame()
     for entry, _class in tqdm(zip(entries, classes), 'Generating csv'):
@@ -204,8 +210,8 @@ def parse(text):
 def parse_directory(path):
     text = ''
     for filename in glob.glob(os.path.join(path, '*.txt')):
-        # print filename
-        text += '\n' + (open(filename).read())
+        print filename
+        text += '\n\n' + (open(filename).read())
     return parse(text)
 
 def main(directory):
@@ -215,7 +221,7 @@ def main(directory):
 if __name__ == '__main__':
     error_message = "Usage: ./parsing.py <directory>"
     if len(sys.argv) < 2:
-        sys.stderr.write(error_message)
+        sys.stderr.write(error_message + '\n')
+        exit(1)
     else:
         main(sys.argv[1])
-    main(sys.argv[1])
