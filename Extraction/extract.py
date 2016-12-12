@@ -3,7 +3,7 @@
 import sys
 
 import ocr
-import parsing
+import parse
 
 def main(pdf_path, result_dir):
     ocr.main(pdf_path, result_dir + '/raw')

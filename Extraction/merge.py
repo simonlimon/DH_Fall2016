@@ -14,9 +14,9 @@ def merge(warren_csv_path, marshall_csv_directory):
         df['chapter'] = chapter
         for index, row in df.iterrows():
             if row.site != 'Sk' or not isinstance(row.coord, str): continue
-            coord = grid.loc[grid.GRID_ID == str(row.coord)]
-            if coord.shape[0] == 0: continue
-            row = coord.iloc[0].append(row)
+            match = grid.loc[grid.GRID_ID == str(row.coord)]
+            if match.shape[0] == 0: continue
+            row = match.iloc[0].append(row)
             row['number'] = int(index)
             result = result.append(row, ignore_index=True)
 
